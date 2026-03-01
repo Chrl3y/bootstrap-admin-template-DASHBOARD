@@ -497,6 +497,26 @@
             <!-- end row -->
           </div>
           <!-- ========== title-wrapper end ========== -->
+
+          <!-- ========== ALERTS & URGENT ISSUES ========== -->
+          <div class="row">
+            <div class="col-12">
+              <div class="card-style mb-20" style="border-left: 4px solid #d50100; padding: 16px 20px;">
+                <div class="d-flex align-items-center justify-content-between mb-10">
+                  <h6 class="text-medium" style="color:#d50100; margin:0;">
+                    <i class="lni lni-alarm me-2"></i> Alerts &amp; Urgent Issues
+                  </h6>
+                  <span class="text-sm text-gray">Live feed — auto-refreshes with API</span>
+                </div>
+                <div id="urgent-alerts-container">
+                  <p class="text-sm text-gray">Loading alerts…</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- ========== END ALERTS ========== -->
+
+          <!-- ========== KPI ROW 1: Operations Overview ========== -->
           <div class="row">
             <div class="col-xl-3 col-lg-4 col-sm-6">
               <div class="icon-card mb-30">
@@ -510,7 +530,6 @@
                 </div>
               </div>
             </div>
-            <!-- End Col -->
             <div class="col-xl-3 col-lg-4 col-sm-6">
               <div class="icon-card mb-30">
                 <div class="icon success">
@@ -523,7 +542,6 @@
                 </div>
               </div>
             </div>
-            <!-- End Col -->
             <div class="col-xl-3 col-lg-4 col-sm-6">
               <div class="icon-card mb-30">
                 <div class="icon purple">
@@ -536,7 +554,6 @@
                 </div>
               </div>
             </div>
-            <!-- End Col -->
             <div class="col-xl-3 col-lg-4 col-sm-6">
               <div class="icon-card mb-30">
                 <div class="icon orange">
@@ -549,8 +566,61 @@
                 </div>
               </div>
             </div>
-            <!-- End Col -->
           </div>
+          <!-- End KPI Row 1 -->
+
+          <!-- ========== KPI ROW 2: Security / Assets / SLA / Jobs ========== -->
+          <div class="row">
+            <div class="col-xl-3 col-lg-4 col-sm-6">
+              <div class="icon-card mb-30">
+                <div class="icon primary">
+                  <i class="lni lni-shield"></i>
+                </div>
+                <div class="content">
+                  <h6 class="mb-10">Security Score</h6>
+                  <h3 class="text-bold mb-10" id="kpi-security">--</h3>
+                  <p id="trend-security" class="text-sm text-gray">(loading)</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-3 col-lg-4 col-sm-6">
+              <div class="icon-card mb-30">
+                <div class="icon success">
+                  <i class="lni lni-database"></i>
+                </div>
+                <div class="content">
+                  <h6 class="mb-10">Total Assets</h6>
+                  <h3 class="text-bold mb-10" id="kpi-assets">--</h3>
+                  <p id="trend-assets" class="text-sm text-gray">(loading)</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-3 col-lg-4 col-sm-6">
+              <div class="icon-card mb-30">
+                <div class="icon purple">
+                  <i class="lni lni-graph"></i>
+                </div>
+                <div class="content">
+                  <h6 class="mb-10">SLA Compliance</h6>
+                  <h3 class="text-bold mb-10" id="kpi-sla">--</h3>
+                  <p id="trend-sla" class="text-sm text-gray">(loading)</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-3 col-lg-4 col-sm-6">
+              <div class="icon-card mb-30">
+                <div class="icon orange">
+                  <i class="lni lni-timer"></i>
+                </div>
+                <div class="content">
+                  <h6 class="mb-10">Scheduled Jobs</h6>
+                  <h3 class="text-bold mb-10" id="kpi-jobs">--</h3>
+                  <p id="trend-jobs" class="text-sm text-gray">(loading)</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- End KPI Row 2 -->
           <!-- End Row -->
           <div class="row">
             <div class="col-lg-7">
@@ -861,6 +931,317 @@
             <!-- End Col -->
           </div>
           <!-- End Row -->
+
+          <!-- ======================================================= -->
+          <!-- SECTION: Ticket & SLA Performance                        -->
+          <!-- ======================================================= -->
+          <div class="title-wrapper pt-20 pb-10">
+            <h5 class="text-medium"><i class="lni lni-ticket me-2"></i>Ticket &amp; SLA Performance</h5>
+            <hr style="margin-top:8px;" />
+          </div>
+          <!-- SLA mini KPIs -->
+          <div class="row mb-10">
+            <div class="col-md-4">
+              <div class="card-style mb-20 text-center">
+                <h6 class="text-medium text-gray">SLA Compliance Rate</h6>
+                <h2 class="text-bold" id="sla-rate" style="color:#365CF5;">--</h2>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card-style mb-20 text-center">
+                <h6 class="text-medium text-gray">Avg. Resolution Time</h6>
+                <h2 class="text-bold" id="sla-mttr">--</h2>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card-style mb-20 text-center">
+                <h6 class="text-medium text-gray">SLA Breaches (30d)</h6>
+                <h2 class="text-bold" id="sla-breach" style="color:#d50100;">--</h2>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-5">
+              <div class="card-style mb-30">
+                <div class="title"><h6 class="text-medium mb-30">SLA Compliance Trend</h6></div>
+                <div class="chart">
+                  <canvas id="Chart5" style="width:100%;height:280px;"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-7">
+              <div class="card-style mb-30">
+                <div class="title"><h6 class="text-medium mb-30">Open Tickets</h6></div>
+                <div class="table-responsive">
+                  <table class="table top-selling-table">
+                    <thead>
+                      <tr>
+                        <th><h6 class="text-sm text-medium">ID</h6></th>
+                        <th><h6 class="text-sm text-medium">Title</h6></th>
+                        <th><h6 class="text-sm text-medium">Priority</h6></th>
+                        <th><h6 class="text-sm text-medium">Assignee</h6></th>
+                        <th><h6 class="text-sm text-medium">SLA</h6></th>
+                        <th><h6 class="text-sm text-medium">Status</h6></th>
+                      </tr>
+                    </thead>
+                    <tbody id="tickets-tbody">
+                      <tr><td colspan="6" class="text-center text-gray text-sm">Loading…</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ======================================================= -->
+          <!-- SECTION: Asset Inventory                                 -->
+          <!-- ======================================================= -->
+          <div class="title-wrapper pt-10 pb-10">
+            <h5 class="text-medium"><i class="lni lni-database me-2"></i>Asset Inventory, Lifecycle &amp; Vendor Subscriptions</h5>
+            <hr style="margin-top:8px;" />
+          </div>
+          <!-- Asset counts -->
+          <div class="row mb-10">
+            <div class="col-6 col-md-3">
+              <div class="card-style mb-20 text-center">
+                <h6 class="text-medium text-gray">Total Assets</h6>
+                <h2 class="text-bold" id="asset-total">--</h2>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="card-style mb-20 text-center">
+                <h6 class="text-medium text-gray">Servers</h6>
+                <h2 class="text-bold" id="asset-servers">--</h2>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="card-style mb-20 text-center">
+                <h6 class="text-medium text-gray">Workstations</h6>
+                <h2 class="text-bold" id="asset-workstations">--</h2>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="card-style mb-20 text-center">
+                <h6 class="text-medium text-gray">Licenses</h6>
+                <h2 class="text-bold" id="asset-licenses">--</h2>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <div class="card-style mb-30">
+                <div class="title"><h6 class="text-medium mb-30">Assets, Vendors &amp; Subscriptions</h6></div>
+                <div class="table-responsive">
+                  <table class="table top-selling-table">
+                    <thead>
+                      <tr>
+                        <th><h6 class="text-sm text-medium">Asset ID</h6></th>
+                        <th><h6 class="text-sm text-medium">Name</h6></th>
+                        <th><h6 class="text-sm text-medium">Type</h6></th>
+                        <th><h6 class="text-sm text-medium">Assignee</h6></th>
+                        <th><h6 class="text-sm text-medium">Vendor</h6></th>
+                        <th><h6 class="text-sm text-medium">Subscription</h6></th>
+                        <th><h6 class="text-sm text-medium">Expiry</h6></th>
+                        <th><h6 class="text-sm text-medium">Cost</h6></th>
+                        <th><h6 class="text-sm text-medium">Status</h6></th>
+                        <th><h6 class="text-sm text-medium">Link</h6></th>
+                      </tr>
+                    </thead>
+                    <tbody id="assets-tbody">
+                      <tr><td colspan="10" class="text-center text-gray text-sm">Loading…</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ======================================================= -->
+          <!-- SECTION: Security Posture                                -->
+          <!-- ======================================================= -->
+          <div class="title-wrapper pt-10 pb-10">
+            <h5 class="text-medium"><i class="lni lni-shield me-2"></i>Security Posture</h5>
+            <hr style="margin-top:8px;" />
+          </div>
+          <div class="row">
+            <div class="col-lg-4">
+              <div class="card-style mb-30">
+                <h6 class="text-medium mb-20">Overall Score</h6>
+                <div class="text-center mb-20">
+                  <h1 class="text-bold" id="sec-score" style="font-size:64px;color:#365CF5;">--</h1>
+                  <p class="text-sm" id="sec-label" style="color:#365CF5;">loading…</p>
+                  <p class="text-sm text-gray">Last scan: <span id="sec-lastscan">--</span></p>
+                </div>
+                <hr />
+                <h6 class="text-medium mt-20 mb-10">Vulnerabilities</h6>
+                <ul class="list-unstyled">
+                  <li class="d-flex justify-content-between py-1">
+                    <span class="text-sm">Critical</span>
+                    <span class="status-btn close-btn" id="sec-critical">--</span>
+                  </li>
+                  <li class="d-flex justify-content-between py-1">
+                    <span class="text-sm">High</span>
+                    <span class="status-btn warning-btn" id="sec-high">--</span>
+                  </li>
+                  <li class="d-flex justify-content-between py-1">
+                    <span class="text-sm">Medium</span>
+                    <span class="status-btn primary-btn" id="sec-medium">--</span>
+                  </li>
+                  <li class="d-flex justify-content-between py-1">
+                    <span class="text-sm">Low</span>
+                    <span class="status-btn success-btn" id="sec-low">--</span>
+                  </li>
+                </ul>
+                <p class="text-sm text-gray mt-10">Open findings: <strong id="sec-open">--</strong></p>
+              </div>
+            </div>
+            <div class="col-lg-8">
+              <div class="card-style mb-30">
+                <div class="title"><h6 class="text-medium mb-30">CVE Findings &amp; Status</h6></div>
+                <div class="table-responsive">
+                  <table class="table top-selling-table">
+                    <thead>
+                      <tr>
+                        <th><h6 class="text-sm text-medium">CVE ID</h6></th>
+                        <th><h6 class="text-sm text-medium">Severity</h6></th>
+                        <th><h6 class="text-sm text-medium">Description</h6></th>
+                        <th><h6 class="text-sm text-medium">Affected</h6></th>
+                        <th><h6 class="text-sm text-medium">Status</h6></th>
+                      </tr>
+                    </thead>
+                    <tbody id="security-tbody">
+                      <tr><td colspan="5" class="text-center text-gray text-sm">Loading…</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ======================================================= -->
+          <!-- SECTION: Scheduled Jobs & Updates                        -->
+          <!-- ======================================================= -->
+          <div class="title-wrapper pt-10 pb-10">
+            <h5 class="text-medium"><i class="lni lni-timer me-2"></i>Scheduled Jobs &amp; Updates</h5>
+            <hr style="margin-top:8px;" />
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <div class="card-style mb-30">
+                <div class="table-responsive">
+                  <table class="table top-selling-table">
+                    <thead>
+                      <tr>
+                        <th><h6 class="text-sm text-medium">Job Name</h6></th>
+                        <th><h6 class="text-sm text-medium">Type</h6></th>
+                        <th><h6 class="text-sm text-medium">Schedule</h6></th>
+                        <th><h6 class="text-sm text-medium">Last Status</h6></th>
+                        <th><h6 class="text-sm text-medium">Last Run</h6></th>
+                        <th><h6 class="text-sm text-medium">Next Run</h6></th>
+                        <th><h6 class="text-sm text-medium">Duration</h6></th>
+                      </tr>
+                    </thead>
+                    <tbody id="jobs-tbody">
+                      <tr><td colspan="7" class="text-center text-gray text-sm">Loading…</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ======================================================= -->
+          <!-- SECTION: Project Management / Status                     -->
+          <!-- ======================================================= -->
+          <div class="title-wrapper pt-10 pb-10">
+            <h5 class="text-medium"><i class="lni lni-flag me-2"></i>Project Management &amp; Status</h5>
+            <hr style="margin-top:8px;" />
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <div class="card-style mb-30">
+                <div class="table-responsive">
+                  <table class="table top-selling-table">
+                    <thead>
+                      <tr>
+                        <th><h6 class="text-sm text-medium">Project</h6></th>
+                        <th><h6 class="text-sm text-medium">Status</h6></th>
+                        <th><h6 class="text-sm text-medium">Owner</h6></th>
+                        <th style="min-width:150px;"><h6 class="text-sm text-medium">Progress</h6></th>
+                        <th><h6 class="text-sm text-medium">Due Date</h6></th>
+                        <th><h6 class="text-sm text-medium">Priority</h6></th>
+                      </tr>
+                    </thead>
+                    <tbody id="projects-tbody">
+                      <tr><td colspan="6" class="text-center text-gray text-sm">Loading…</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ======================================================= -->
+          <!-- SECTION: Trends & Insights                              -->
+          <!-- ======================================================= -->
+          <div class="title-wrapper pt-10 pb-10">
+            <h5 class="text-medium"><i class="lni lni-graph me-2"></i>Trends &amp; Insights</h5>
+            <hr style="margin-top:8px;" />
+          </div>
+          <div class="row">
+            <div class="col-lg-7">
+              <div class="card-style mb-30">
+                <div class="title d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="text-medium mb-2">MTTR &amp; Uptime History</h6>
+                    <div class="d-flex gap-3">
+                      <span class="text-sm"><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#f2994a;margin-right:4px;"></span>MTTR (hrs)</span>
+                      <span class="text-sm"><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#219653;margin-right:4px;"></span>Uptime %</span>
+                    </div>
+                  </div>
+                  <div class="select-style-1">
+                    <div class="select-position select-sm">
+                      <select class="light-bg">
+                        <option value="">Last 12 months</option>
+                        <option value="">Last 6 months</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="chart">
+                  <canvas id="Chart6" style="width:100%;height:340px;margin-left:-35px;"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-5">
+              <div class="card-style mb-30">
+                <h6 class="text-medium mb-20">Key Insights</h6>
+                <ul class="list-unstyled">
+                  <li class="d-flex align-items-start gap-2 py-2 border-bottom">
+                    <i class="lni lni-arrow-down" style="color:#219653;margin-top:3px;"></i>
+                    <span class="text-sm"><strong>MTTR improved 35%</strong> over the last 12 months — faster incident response processes are taking effect.</span>
+                  </li>
+                  <li class="d-flex align-items-start gap-2 py-2 border-bottom">
+                    <i class="lni lni-arrow-up" style="color:#d50100;margin-top:3px;"></i>
+                    <span class="text-sm"><strong>Peak incidents in April</strong> (12) correlate with the Q2 infrastructure migration window.</span>
+                  </li>
+                  <li class="d-flex align-items-start gap-2 py-2 border-bottom">
+                    <i class="lni lni-alarm" style="color:#f2994a;margin-top:3px;"></i>
+                    <span class="text-sm"><strong>SSL cert expiry risk</strong> — 1 certificate expiring within 7 days. Review Assets table.</span>
+                  </li>
+                  <li class="d-flex align-items-start gap-2 py-2 border-bottom">
+                    <i class="lni lni-arrow-up" style="color:#d50100;margin-top:3px;"></i>
+                    <span class="text-sm"><strong>OS Patch job failed</strong> 3 days ago. Investigate and reschedule before next maintenance window.</span>
+                  </li>
+                  <li class="d-flex align-items-start gap-2 py-2">
+                    <i class="lni lni-checkmark-circle" style="color:#219653;margin-top:3px;"></i>
+                    <span class="text-sm"><strong>Uptime stable at 99.7%</strong> over 12 months — within SLA target of 99.5%.</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
         </div>
         <!-- end container -->
       </section>

@@ -1,51 +1,34 @@
 // ============================================================
 // IT Operations Dashboard — API Service
 // ============================================================
+// Each exported function returns a Promise that resolves to the
+// data shape documented below.
 //
-// Each function returns a Promise that resolves to the data shape
-// described below. When USE_MOCK is true (set in api-config.js),
-// mock data is returned immediately — no server required.
+// USE_MOCK = true  → mock data returned instantly (no server needed)
+// USE_MOCK = false → real fetch() with mock fallback on error
 //
-// When USE_MOCK is false, a real fetch() is attempted. If it fails
-// for any reason, the mock data is used as a fallback so the
-// dashboard never goes blank.
-//
-// ============================================================
-// CUSTOM API BLUEPRINT
-// When you build your backend, implement these endpoints:
-//
-//   GET /api/metrics
-//     → { activeIncidents:Number, serverUptime:String, openTickets:Number,
-//         alertsToday:Number, incidentTrend:Number, uptimeTrend:Number,
-//         ticketTrend:Number, alertTrend:Number }
-//
-//   GET /api/servers/usage
-//     → { labels:String[], cpu:Number[], memory:Number[] }
-//
-//   GET /api/incidents
-//     → { labels:String[], counts:Number[],
-//         list:[{ id, service, severity, status, assignee, time }] }
-//
-//   GET /api/alerts/trends
-//     → { labels:String[], critical:Number[], warning:Number[], info:Number[] }
-//
-//   GET /api/services/health
-//     → { labels:String[], current:Number[], previous:Number[] }
-//
-//   GET /api/servers/locations
-//     → { markers:[{ name:String, coords:[lat, lng] }] }
 // ============================================================
 
 const MOCK = {
+
+  // ---- Operations Overview --------------------------------
   metrics: {
     activeIncidents: 12,
     serverUptime: "99.7%",
     openTickets: 43,
     alertsToday: 7,
-    incidentTrend: -8,   // negative = improvement (fewer incidents)
-    uptimeTrend: 0.2,    // positive = uptime increased
-    ticketTrend: 15,     // positive = more open tickets (worse)
-    alertTrend: -22,     // negative = fewer alerts (better)
+    securityScore: 78,
+    totalAssets: 342,
+    slaCompliance: 87,
+    scheduledJobsCount: 24,
+    incidentTrend: -8,
+    uptimeTrend: 0.2,
+    ticketTrend: 15,
+    alertTrend: -22,
+    securityTrend: 3,
+    assetTrend: 5,
+    slaTrend: -2,
+    jobsTrend: 0,
   },
 
   serverUsage: {
@@ -88,9 +71,108 @@ const MOCK = {
       { name: "AP-NE (Tokyo)",       coords: [35.6762,  139.6503] },
     ],
   },
+
+  // ---- Alerts & Urgent Issues ----------------------------
+  urgentAlerts: [
+    { id: "ALT-001", severity: "Critical", message: "Auth API P99 latency >5 s (current: 7.2 s)", service: "Auth API", time: "5m ago" },
+    { id: "ALT-002", severity: "High",     message: "CDN edge node us-east-3 is offline",          service: "CDN",      time: "12m ago" },
+    { id: "ALT-003", severity: "High",     message: "SSL certificate expires in 7 days: api.company.com", service: "TLS/PKI", time: "1h ago" },
+  ],
+
+  // ---- Ticket & SLA Performance --------------------------
+  // GET /api/tickets/sla
+  ticketsSLA: {
+    complianceRate: 87,
+    avgResolutionHours: 4.2,
+    breachedCount: 6,
+    openCount: 43,
+    slaLabels:  ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+    slaRates:   [92, 88, 95, 80, 87, 91, 85, 89, 83, 90, 88, 87],
+    tickets: [
+      { id: "TKT-1234", title: "Auth service intermittent 502s",        priority: "P1", assignee: "J. Smith",  slaRemaining: "2h",  breached: false, status: "In Progress" },
+      { id: "TKT-1233", title: "Disk usage >90% on db-prod-03",         priority: "P2", assignee: "M. Lee",    slaRemaining: "—",   breached: true,  status: "Open" },
+      { id: "TKT-1232", title: "SSL cert renewal for api.company.com",  priority: "P2", assignee: "R. Patel",  slaRemaining: "22h", breached: false, status: "In Progress" },
+      { id: "TKT-1231", title: "VPN timeout for remote users",           priority: "P3", assignee: "T. Brown",  slaRemaining: "6h",  breached: false, status: "Open" },
+      { id: "TKT-1230", title: "Log shipping lag on analytics cluster",  priority: "P3", assignee: "S. Nguyen", slaRemaining: "—",   breached: true,  status: "Escalated" },
+    ],
+  },
+
+  // ---- Asset Inventory ------------------------------------
+  // GET /api/assets
+  // Response: { total, byType:{}, items:[{ id, name, type, assignee, vendor,
+  //             subscription, expiry, cost, status, link }] }
+  assets: {
+    total: 342,
+    byType: { servers: 48, workstations: 178, network: 24, licenses: 92 },
+    items: [
+      { id: "SRV-001", name: "prod-api-01",         type: "Server",     assignee: "Ops Team",  vendor: "Dell",       subscription: "ProSupport Plus", expiry: "2026-03-15", cost: "$1,200/yr",  status: "Active",        link: "#" },
+      { id: "SRV-002", name: "prod-db-01",           type: "Server",     assignee: "DBA Team",  vendor: "AWS",        subscription: "EC2 Reserved",    expiry: "2026-12-31", cost: "$3,400/yr",  status: "Active",        link: "#" },
+      { id: "LIC-001", name: "Splunk Enterprise",    type: "License",    assignee: "SecOps",    vendor: "Splunk",     subscription: "Annual",          expiry: "2025-11-30", cost: "$18,000/yr", status: "Expiring Soon", link: "#" },
+      { id: "LIC-002", name: "PagerDuty Business",   type: "License",    assignee: "Ops Team",  vendor: "PagerDuty",  subscription: "Annual",          expiry: "2026-06-01", cost: "$4,200/yr",  status: "Active",        link: "#" },
+      { id: "NET-001", name: "core-switch-01",       type: "Network",    assignee: "NetOps",    vendor: "Cisco",      subscription: "SmartNet",        expiry: "2026-01-20", cost: "$800/yr",    status: "Active",        link: "#" },
+      { id: "WKS-001", name: "ws-finance-batch",     type: "Workstation",assignee: "Finance",   vendor: "HP",         subscription: "HP Care Pack",    expiry: "2026-09-01", cost: "$350/yr",    status: "Active",        link: "#" },
+    ],
+  },
+
+  // ---- Security Posture -----------------------------------
+  // GET /api/security
+  // Response: { score, scoreLabel, scoreTrend, vulnerabilities:{critical,high,medium,low},
+  //             openFindings, lastScan, findings:[{ id, severity, description, affected, status }] }
+  security: {
+    score: 78,
+    scoreLabel: "Good",
+    scoreTrend: 3,
+    vulnerabilities: { critical: 2, high: 8, medium: 23, low: 45 },
+    openFindings: 33,
+    lastScan: "2h ago",
+    findings: [
+      { id: "CVE-2024-1182", severity: "Critical", description: "OpenSSL buffer overflow",                  affected: "prod-api-01, prod-api-02",  status: "Patching"   },
+      { id: "CVE-2024-0987", severity: "High",     description: "Redis unauthenticated RCE",               affected: "cache-prod-01",             status: "Open"       },
+      { id: "CVE-2024-3311", severity: "High",     description: "Kubernetes API server misconfiguration",  affected: "k8s-prod-cluster",          status: "Remediated" },
+      { id: "CVE-2023-9981", severity: "Medium",   description: "Node.js prototype pollution",             affected: "api-service v2.4.1",        status: "Open"       },
+    ],
+  },
+
+  // ---- Scheduled Jobs & Updates ---------------------------
+  // GET /api/jobs
+  // Response: { items:[{ name, type, schedule, lastStatus, lastRun, nextRun, duration }] }
+  scheduledJobs: {
+    items: [
+      { name: "Database Backup",        type: "Backup",      schedule: "Daily 02:00 UTC",      lastStatus: "Success", lastRun: "3h ago",  nextRun: "21h", duration: "14m" },
+      { name: "Log Rotation",           type: "Maintenance", schedule: "Daily 00:00 UTC",      lastStatus: "Success", lastRun: "5h ago",  nextRun: "19h", duration: "2m"  },
+      { name: "Security Scan (Nessus)", type: "Security",    schedule: "Weekly Sun 01:00",     lastStatus: "Success", lastRun: "2d ago",  nextRun: "5d",  duration: "47m" },
+      { name: "SSL Cert Check",         type: "Monitoring",  schedule: "Daily 08:00 UTC",      lastStatus: "Warning", lastRun: "1h ago",  nextRun: "23h", duration: "1m"  },
+      { name: "OS Patch Deployment",    type: "Update",      schedule: "Bi-weekly Tue 22:00",  lastStatus: "Failed",  lastRun: "3d ago",  nextRun: "11d", duration: "—"   },
+      { name: "DB Index Rebuild",       type: "Maintenance", schedule: "Weekly Sat 03:00",     lastStatus: "Success", lastRun: "4d ago",  nextRun: "3d",  duration: "28m" },
+    ],
+  },
+
+  // ---- Project Management ---------------------------------
+  // GET /api/projects
+  // Response: { items:[{ name, status, owner, progress, dueDate, priority }] }
+  projects: {
+    items: [
+      { name: "Cloud Infrastructure Migration", status: "In Progress", owner: "Alice Chen",    progress: 68,  dueDate: "2026-04-30", priority: "High"   },
+      { name: "SIEM Platform Upgrade",          status: "In Progress", owner: "Bob Martinez",  progress: 35,  dueDate: "2026-05-15", priority: "High"   },
+      { name: "Zero Trust Network Rollout",     status: "Planning",    owner: "Carol Liu",     progress: 10,  dueDate: "2026-07-01", priority: "Medium" },
+      { name: "Helpdesk Portal Redesign",       status: "In Progress", owner: "Dave Kim",      progress: 80,  dueDate: "2026-03-15", priority: "Medium" },
+      { name: "DR/BCP Plan Update",             status: "Completed",   owner: "Eve Sharma",    progress: 100, dueDate: "2026-02-28", priority: "Low"    },
+      { name: "Asset Mgmt Tool Rollout",        status: "On Hold",     owner: "Frank O'Brien", progress: 45,  dueDate: "2026-06-30", priority: "Low"    },
+    ],
+  },
+
+  // ---- Trends & Insights ----------------------------------
+  // GET /api/trends
+  // Response: { labels[], mttr[], uptimeHistory[] }
+  trends: {
+    labels:         ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+    mttr:           [5.2, 4.8, 6.1, 4.3, 5.0, 4.7, 4.5, 4.2, 4.8, 3.9, 3.6, 3.4],
+    uptimeHistory:  [99.2, 99.8, 99.5, 99.1, 99.7, 99.9, 99.6, 99.3, 99.7, 99.8, 99.6, 99.7],
+  },
+
 };
 
-// Internal fetch wrapper — falls back to mock on any error
+// ---- Internal fetch wrapper (falls back to mock on failure) ------
 async function _fetch(endpoint, mockKey) {
   if (typeof USE_MOCK !== "undefined" && USE_MOCK) {
     return Promise.resolve(MOCK[mockKey]);
@@ -105,7 +187,7 @@ async function _fetch(endpoint, mockKey) {
   }
 }
 
-// Public API — import/call these from dashboard.js
+// ---- Public API ----------------------------------------------------
 const ApiService = {
   getMetrics:         () => _fetch(ENDPOINTS.metrics,         "metrics"),
   getServerUsage:     () => _fetch(ENDPOINTS.serverUsage,     "serverUsage"),
@@ -113,4 +195,11 @@ const ApiService = {
   getAlertTrends:     () => _fetch(ENDPOINTS.alertTrends,     "alertTrends"),
   getServiceHealth:   () => _fetch(ENDPOINTS.serviceHealth,   "serviceHealth"),
   getServerLocations: () => _fetch(ENDPOINTS.serverLocations, "serverLocations"),
+  getUrgentAlerts:    () => _fetch(ENDPOINTS.urgentAlerts,    "urgentAlerts"),
+  getTicketsSLA:      () => _fetch(ENDPOINTS.ticketsSLA,      "ticketsSLA"),
+  getAssets:          () => _fetch(ENDPOINTS.assets,          "assets"),
+  getSecurity:        () => _fetch(ENDPOINTS.security,        "security"),
+  getScheduledJobs:   () => _fetch(ENDPOINTS.scheduledJobs,   "scheduledJobs"),
+  getProjects:        () => _fetch(ENDPOINTS.projects,        "projects"),
+  getTrends:          () => _fetch(ENDPOINTS.trends,          "trends"),
 };
